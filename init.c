@@ -34,6 +34,7 @@
 #include "lib/pow2.h"
 
 const char fio_version_string[] = FIO_VERSION;
+const char fio_minimal_field_names_string_v3[] = "terse_version_3;fio_version;jobname;groupid;error;read_kb;read_bandwidth;read_iops;read_runtime_ms;read_slat_min;read_slat_max;read_slat_mean;read_slat_dev;read_clat_max;read_clat_min;read_clat_mean;read_clat_dev;read_clat_pct01;read_clat_pct02;read_clat_pct03;read_clat_pct04;read_clat_pct05;read_clat_pct06;read_clat_pct07;read_clat_pct08;read_clat_pct09;read_clat_pct10;read_clat_pct11;read_clat_pct12;read_clat_pct13;read_clat_pct14;read_clat_pct15;read_clat_pct16;read_clat_pct17;read_clat_pct18;read_clat_pct19;read_clat_pct20;read_tlat_min;read_lat_max;read_lat_mean;read_lat_dev;read_bw_min;read_bw_max;read_bw_agg_pct;read_bw_mean;read_bw_dev;write_kb;write_bandwidth;write_iops;write_runtime_ms;write_slat_min;write_slat_max;write_slat_mean;write_slat_dev;write_clat_max;write_clat_min;write_clat_mean;write_clat_dev;write_clat_pct01;write_clat_pct02;write_clat_pct03;write_clat_pct04;write_clat_pct05;write_clat_pct06;write_clat_pct07;write_clat_pct08;write_clat_pct09;write_clat_pct10;write_clat_pct11;write_clat_pct12;write_clat_pct13;write_clat_pct14;write_clat_pct15;write_clat_pct16;write_clat_pct17;write_clat_pct18;write_clat_pct19;write_clat_pct20;write_tlat_min;write_lat_max;write_lat_mean;write_lat_dev;write_bw_min;write_bw_max;write_bw_agg_pct;write_bw_mean;write_bw_dev;cpu_user;cpu_sys;cpu_csw;cpu_mjf;pu_minf;iodepth_1;iodepth_2;iodepth_4;iodepth_8;iodepth_16;iodepth_32;iodepth_64;lat_2us;lat_4us;lat_10us;lat_20us;lat_50us;lat_100us;lat_250us;lat_500us;lat_750us;lat_1000us;lat_2ms;lat_4ms;lat_10ms;lat_20ms;lat_50ms;lat_100ms;lat_250ms;lat_500ms;lat_750ms;lat_1000ms;lat_2000ms;lat_over_2000ms;disk_name;disk_read_iops;disk_write_iops;disk_read_merges;disk_write_merges;disk_read_ticks;write_ticks;disk_queue_time;disk_util";
 
 #define FIO_RANDSEED		(0xb1899bedUL)
 
@@ -106,6 +107,11 @@ static struct option l_opts[FIO_NR_OPTIONS] = {
 		.name		= (char *) "minimal",
 		.has_arg	= no_argument,
 		.val		= 'm' | FIO_CLIENT_FLAG,
+	},
+	{
+		.name		= (char *) "minimal-field-names",
+		.has_arg	= no_argument,
+		.val		= 'n' | FIO_CLIENT_FLAG,
 	},
 	{
 		.name		= (char *) "output-format",
@@ -2015,6 +2021,7 @@ static void usage(const char *name)
 	printf("  --output\t\tWrite output to file\n");
 	printf("  --bandwidth-log\tGenerate aggregate bandwidth logs\n");
 	printf("  --minimal\t\tMinimal (terse) output\n");
+	printf("  --minimal-field-names\t\tName of each field in minimal (terse) output separated by semicolons and exit\n");
 	printf("  --output-format=type\tOutput format (terse,json,json+,normal)\n");
 	printf("  --terse-version=type\tSet terse version output format"
 		" (default 3, or 2 or 4)\n");
@@ -2399,6 +2406,18 @@ int parse_cmd_line(int argc, char *argv[], int client_type)
 			if (!cur_client) {
 				log_info("%s\n", fio_version_string);
 				do_exit++;
+			}
+			break;
+		case 'n':
+			did_arg = 1;
+			if (!cur_client) {
+				if (terse_version == 3) {
+					log_info("%s\n", fio_minimal_field_names_string_v3);
+					do_exit++;
+				} else {
+					log_info("Names for terse version %i not included\n", terse_version);
+					do_exit++;
+				}
 			}
 			break;
 		case 'V':
